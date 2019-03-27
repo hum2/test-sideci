@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "sider/phinder": "^0.6.2"
+    }
+}
