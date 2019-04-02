@@ -40,4 +40,8 @@ class HogeFuga {
 	function print_email($email) {}
 	function printEmail($email) {}
 }
+
+// cookie setCookie
+setcookie('test', 'hoge');
+setcookie('test', 'hoge', time()+3600, 'example.com', '');
 ?>
