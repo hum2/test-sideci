@@ -31,12 +31,12 @@
       - in_array(4, $arr, false)
 
 - # The rule identifier. It must be unique in the YAML file.
-  id: sample.if
+  id: sample.md5_is_not_recommended
   # Pattern syntax. The `...` pattern matches variable length arguments or array pairs.
   # As a result, this pattern matches `var_dump` function call with any arguments.
-  pattern: define(_, _)
+  pattern: md5(_)
   # The message to display when code pieces are matched with the pattern.
-  message: Do not use if.
+  message: Do not use define.
   test:
     # Code pieces that will match your pattern.
     # This means the following codes are bad as you expected.
