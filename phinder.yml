@@ -1,135 +1,329 @@
-- id: com.example.php.core.md5
-  pattern: md5(_)
-  message: |
-    この関数は、セキュリティの観点から推奨されていません。
-    https://www.php.net/manual/ja/function.md5.php
-    より強力なハッシュアルゴリズムを利用しましょう。
-    https://www.php.net/manual/ja/function.password-hash.php
-  test:
-    fail:
-      - md5($str)
-    pass:
-      - password_hash($str, PASSWORD_DEFAULT)
-- id: com.example.php.core.sha1
-  pattern: sha1(_)
-  message: |
-    この関数は、セキュリティの観点から推奨されていません。
-    https://www.php.net/manual/ja/function.sha1.php
-    より強力なハッシュアルゴリズムを利用しましょう。
-    https://www.php.net/manual/ja/function.password-hash.php
-  test:
-    fail:
-      - sha1($str)
-    pass:
-      - password_hash($str, PASSWORD_DEFAULT)
-- id: com.example.php.core.setcookie
-  pattern: 
-    - setcookie(_)
-    - setcookie(_, _)
-    - setcookie(_, _, _)
-    - setcookie(_, _, _, _)
-    - setcookie(_, _, _, _, _)
-  message: |
-    Cookieを生成する際は、セキュリティリスクを減らすために必要に応じて下記の引数を指定してください。
-    ・サービスがHTTPSで提供されている
-    →第６引数に true を指定する
-    ・JavaScriptから参照されることがない
-    →第７引数に true を指定する
-    https://www.php.net/manual/ja/function.setcookie.php
-  test:
-    fail:
-      - setcookie($name, $value)
-      - setcookie($name, $value, time()+3600)
-      - setcookie($name, $value, time()+3600, 'example.com')
-      - setcookie($name, $value, time()+3600, 'example.com', '')
-    pass:
-      - setcookie($name, $value, time()+3600, 'example.com', '', false, true)
-      - setcookie($name, $value, time()+3600, 'example.com', '', true, true)
-- id: com.example.php.core.uniqid
-  pattern: uniqid()
-  message: |
-    より精度を上げるため、第二引数(true)を指定することをお勧めします。
-    https://www.php.net/manual/ja/function.uniqid.php
-  test:
-    fail:
-      - uniqid()
-    pass:
-      - uniqid('', true)
-- id: com.example.php.ver72.create_function
+- id: review.sider.php.72.create_function
   pattern: create_function(...)
   message: |
-    この関数は、PHP 7.2 で非推奨になりました。
-    https://www.php.net/manual/ja/function.create-function.php
-    無名関数を利用することをお勧めします。
-    https://www.php.net/manual/ja/functions.anonymous.php
+    create_function の代わりに無名関数を使ってください
+
+    `create_function` 関数はPHP 7.2で非推奨になりました。
+
+    - https://www.php.net/manual/ja/functions.anonymous.php
   fail:
     - create_function('$var', 'return "Hello,{$var}";');
   pass:
     - function ($var) { return "Hello,{$var}"; }
-  glob:
-    - "*.php"
-    - "**/*.php"
-- id: com.example.php.ver72.parse_str
+
+- id: review.sider.php.72.parse_str
   pattern: parse_str(_)
   message: |
-    PHP 7.2 から第二引数を省略することが非推奨となりました。
-    セキュリティリスクとなるため、指定してください。
-    https://www.php.net/manual/ja/function.parse-str.php
+    parse_str を使う場合には第2引数を指定してください。
+
+    PHP 7.2から、第二引数を省略することは非推奨となりました。
+    入力される文字列によって、意図しない変数の代入が発生するため、必ず第2引数を指定してください。
+
+    - https://www.php.net/manual/ja/function.parse-str.php
   fail:
-    - parse_str($str)
+    - parse_str("password=topsecret")
   pass:
-    - parse_str($str, $output)
-- id: com.example.php.ver72.each
+    - parse_str("password=topsecret", $output)
+
+- id: review.sider.php.72.each
   pattern: each(_)
   message: |
-    この関数は、PHP 7.2 で非推奨となりました。
-    foreach を利用してください。
-    https://www.php.net/manual/ja/control-structures.foreach.php
+    each ではなく foreach を使ってください
+
+    `each` 関数は、PHP 7.2で非推奨となりました。
+    `foreach` 構文を使用してください。
+
+    - https://www.php.net/manual/ja/control-structures.foreach.php
   fail:
     - each($arr)
   pass:
-    - foreach($arr as $var)
-- id: com.example.php.ver72.gmp_random
+    - foreach($arr as $var) { echo $var; }
+
+- id: review.sider.php.72.gmp_random
   pattern: gmp_random(_)
   message: |
+    gmp_random ではなく gmp_random_range を使ってください
+
     この関数は、PHP 7.2 で非推奨となりました。
-    gmp_random_range 関数を利用してください。
-    https://www.php.net/manual/ja/function.gmp-random-range.php
+    gmp_random で得られる乱数の上限はプラットフォーム依存で、ユーザーが事前に確認することはできません。
+    上限と下限が指定できる、より柔軟な gmp_random_range 関数を利用してください。
+
+    - https://wiki.php.net/rfc/deprecations_php_7_2#gmp_random
+    - https://www.php.net/manual/ja/function.gmp-random-range.php
   fail:
     - gmp_random(1)
   pass:
     - gmp_random_range(0, 100)
-- id: com.example.php.ver73.image2wbmp
+
+- id: review.sider.php.73.image2wbmp
   pattern: image2wbmp(...)
   message: |
+    image2wbmp ではなく imagewbmp を使ってください
+
     この関数は、 PHP 7.3 で非推奨となりました。
     同等の機能を持つ imagewbmp を使用しましょう。
-    https://wiki.php.net/rfc/image2wbmp
+
+    - https://www.php.net/manual/ja/function.imagewbmp.php
+    - https://wiki.php.net/rfc/image2wbmp
   fail:
     - image2wbmp($image)
   pass:
     - imagewbmp($image)
-# phinerで設定ができなかったカスタムルール
-# 下記のルールはpassパターン（[]）もこの条件にマッチしてしまうため、正常に動作しません
-# - id: com.example.php.ver54.array
-#   pattern: "array(...)"
-#   message: |
-#     PHP 5.4 以降、 配列は [] で定義できます。 
-#     可読性を上げるため、活用しましょう。
-#     https://www.php.net/manual/ja/language.types.array.php
-#   fail:
-#     - array('foo')
-#   pass:
-#     - "['foo']"
-# 制御構文、関数以外のルールが作成できないため、null合体演算子のチェックなどが行なえません
-# - id: com.example.php.ver70.elvis_operator
-#     pattern:
-#         regexp: 'isset\((\S+)\) *\? *\1 * : *(["''])\S+\2'
-#     message: |
-#       PHP 7.0 以降、 エルビス演算子 の代わりに null合体演算子 を利用できます。 
-#       可読性を上げるため、活用しましょう。
-#       https://ja.wikipedia.org/wiki/Null%E5%90%88%E4%BD%93%E6%BC%94%E7%AE%97%E5%AD%90#PHP
-#     fail:
-#       - "isset($var) ? $var : 'var'"
-#     pass:
-#       - $var ?? 'var'
+- id: review.sider.php.debug
+  pattern:
+    - var_dump(...)
+    - print_r(...)
+  message: |
+    デバッグコードを消し忘れている可能性があります
+
+    開発時に変数を確認する際は、xdebug等を使うことでデバッグコードを入れずにデバッグすることができます。
+    この変数を意図的に使っている場合はこの警告を無視してください。
+
+    - https://www.php.net/manual/ja/function.var-dump.php
+  fail:
+    - phpinfo()
+  justification:
+    - 意図的に出力をしている場合
+- id: review.sider.php.phpinfo
+  pattern:
+    - phpinfo()
+    - phpinfo(_)
+  message: |
+    本番環境のPHP設定値が公開されるリスクがあります
+
+    この関数はPHP設定値を出力します。
+    攻撃の糸口になる可能性もあるため、本番環境で出力されないようにしましょう。
+
+    - https://www.php.net/manual/ja/function.phpinfo.php
+    - http://blog.shinkaku.co.jp/archives/19853570.html
+  fail:
+    - phpinfo()
+  justification:
+    - 開発環境のみ出力されるようになっている場合
+- id: review.sider.php.array_push
+  pattern:
+    - array_push(_,_)
+  message: |
+    配列に一つの要素のみを加える場合、 $arr[] = $val が使えます
+
+    array_push($arr, $val) は $arr[] = $val と同義です。
+    関数を呼ぶオーバヘッドや可読性の面から、後者を使いましょう。
+
+    - https://www.php.net/manual/ja/function.array-push.php
+  fail:
+    - array_push($arr, $val)
+  pass:
+    - $arr[] = $val
+    - array_push($arr, $val1, $val2)
+- id: review.sider.php.preg
+  pattern:
+    - preg_split(...)
+    - preg_replace(...)
+  message: |
+    可能な限り正規表現を使用しない関数を使いましょう
+
+    正規表現を使用しない関数を使うことで、よりパフォーマンスを改善できます。
+    できるだけ正規表現を使用しない関数を使いましょう。
+
+    - https://www.php.net/manual/ja/function.explode.php
+    - https://www.php.net/manual/ja/function.str-replace.php
+  fail:
+    - preg_split('/,/', $str)
+    - preg_replace("/\r\n|\r|\n/", '', $str)
+  pass:
+    - preg_split('/\s/', $str)
+    - str_replace(["\r\n", "\r", "\n"], '', $str)
+    - preg_replace('/ini_set\((.+?)\);/', '', $str)
+  justification:
+    - 正規表現が必要な複雑なパターン
+- id: review.sider.php.eval
+  pattern:
+    - eval(_)
+  message: |
+    任意のPHPコードが実行されてしまうリスクがあります
+
+    この関数は引数の文字列をPHPコードとして評価します。
+    本当にこの関数を使うべきか慎重に判断してください。
+
+    - https://www.php.net/manual/ja/function.eval.php
+  fail:
+    - eval($code)
+  justification:
+    - 引数にユーザ入力値が含まれない場合
+- id: review.sider.php.exec_command
+  pattern:
+    - exec(_)
+    - system(...)
+    - passthru(...)
+    - shell_exec(_)
+  message: |
+    任意のシェルコマンドが実行されてしまうリスクがあります
+
+    この関数は、引数の文字列をコマンドとして実行します。
+    ユーザが入力した値を実行しないよう考慮してください。
+    入力値を利用する場合、 escapeshellarg または escapeshellcmd を使ってエスケープしてください。
+
+    - https://www.php.net/manual/ja/function.exec.php
+    - https://www.php.net/manual/ja/function.system.php
+    - https://www.php.net/manual/ja/function.passthru.php
+    - https://www.php.net/manual/ja/function.exec.php
+
+    - https://www.php.net/manual/ja/function.escapeshellarg.php
+    - https://www.php.net/manual/ja/function.escapeshellcmd.php
+  fail:
+    - eval($code)
+  justification:
+    - 引数にユーザ入力値が含まれない場合
+- id: review.sider.php.htmlspecialchars
+  pattern:
+    - htmlspecialchars(_)
+  message: |
+    エンティティ化が不十分なため、第二引数を指定してください
+
+    この関数は標準では ' (シングルクォーテーション)をエンティティ化しません
+    第二引数で ENT_QUOTES などの適切な値を設定してください。
+
+    - https://www.php.net/manual/ja/function.htmlspecialchars.php
+  fail:
+    - htmlspecialchars($values)
+  pass:
+    - htmlspecialchars($values, ENT_QUOTES)
+- id: review.sider.php.urlencode
+  pattern:
+    - urlencode(_)
+    - rawurlencode(_)
+  message: |
+    人的なミスを防ぐため、 http_build_query を使いましょう
+
+    パラメータ名のエスケープ忘れを防ぐため、 http_build_query を使ったほうが安全です。
+
+    - https://blog.ohgaki.net/dangerous-php-functions#urlencode_rawurlencode
+  fail:
+    - htmlspecialchars($values)
+  pass:
+    - htmlspecialchars($values, ENT_QUOTES)
+- id: review.sider.php.extract
+  pattern: extract(_)
+  message: |
+    変数名が衝突した場合の挙動を明示的に指定しましょう
+
+    基本的には、 EXTR_SKIP や第三引数を指定して既存の変数を上書きしないようにすべきです。
+    またユーザ入力（ $_GET , $_FILES 等）にこの変数は使わないでください。
+
+    - https://www.php.net/manual/ja/function.extract.php
+  fail:
+    - extract($values)
+    - extract($_SERVER)
+    - extract($_GET)
+    - extract($_POST)
+    - extract($_FILES)
+    - extract($_COOKIE)
+    - extract($_REQUEST)
+  pass:
+    - extract($values, EXTR_SKIP)
+    - extract($values, EXTR_PREFIX_ALL, 'var_')
+- id: review.sider.php.5516.ucwords
+  pattern:
+    - ucwords(_,_)
+    - getenv(_,_)
+  message: |
+    第二引数を指定した場合、特定の環境下で動作しない恐れがあります
+
+    Ubuntu 14.04 にインストールされている PHP 5.5.9 では使えません。
+    このコードが広く使われる可能性がある場合、第二引数を利用するべきか検討してください。
+
+    - https://www.php.net/manual/ja/function.ucwords.php
+    - https://www.php.net/manual/ja/function.getenv.php
+  justification:
+    - PHP 5.4.32 or 5.5.16 以降の環境でしか実行しない場合
+- id: review.sider.php.70.dirname
+  pattern: dirname(dirname(_))
+  message: |
+    二階層以上遡る場合、第二引数を指定してください
+
+    PHP 7.0 以降、第二引数に遡る親ディレクトリの数を指定できます。
+    可読性を高めるために第二引数を使いましょう。
+
+    - https://www.php.net/manual/ja/function.dirname.php
+  fail:
+    - dirname(dirname(__FILE__))
+  pass:
+    - dirname(__FILE__, 2)
+- id: review.sider.php.70.unserialize
+  pattern: unserialize(_)
+  message: |
+    オブジェクトインジェクションを防ぐため、生成されるクラスを限定しましょう
+
+    PHP 7.0 以降、第二引数を指定して生成されるクラスを限定することが可能です。
+
+    - https://www.php.net/manual/ja/function.dirname.php
+    - https://blog.tokumaru.org/2017/09/introduction-to-object-injection.html
+  fail:
+    - unserialize($object)
+  pass:
+    - unserialize($object, ['allowed_classes' => ["classA"]])
+  justification:
+    - 実行環境が PHP 7.0 未満の場合
+- id: review.sider.php.laravel.debug
+  pattern:
+    - dd(...)
+    - dump(...)
+  message: |
+    デバッグコードを消し忘れている可能性があります
+
+    開発時に変数を確認する際は、xdebug等を使うことでデバッグコードを入れずにデバッグすることができます。
+
+    - https://readouble.com/laravel/5.8/ja/helpers.html#method-dd
+    - https://readouble.com/laravel/5.8/ja/helpers.html#method-dump
+- id: review.sider.php.laravel.58.deprecated
+  pattern:
+    - array_add(...)
+    - array_collapse(_)
+    - array_divide(_)
+    - array_dot(...)
+    - array_except(_,_)
+    - array_first(...)
+    - array_flatten(_)
+    - array_forget(_,_)
+    - array_get(...)
+    - array_has(_,_)
+    - array_last(...)
+    - array_only(_,_)
+    - array_pluck(...)
+    - array_prepend(...)
+    - array_pull(...)
+    - array_random(...)
+    - array_set(_,_,_)
+    - array_sort(...)
+    - array_sort_recursive(_)
+    - array_where(_,_)
+    - array_wrap(_)
+    - camel_case(_)
+    - ends_with(_,_)
+    - kebab_case(_)
+    - starts_with(_,_)
+    - snake_case(...)
+    - str_after(_,_)
+    - str_before(_,_)
+    - str_contains(_,_)
+    - str_finish(_,_)
+    - str_is(_,_)
+    - str_limit(...)
+    - str_plural(...)
+    - str_random()
+    - str_random(_)
+    - str_replace_array(_,_,_)
+    - str_replace_first(_,_,_)
+    - str_replace_last(_,_,_)
+    - str_singular(_)
+    - str_slug(...)
+    - str_start(_,_)
+    - studly_case(_)
+    - title_case(_)
+  message: |
+    Arr , Str 内の元の関数を使ってください
+
+    この関数は Laravel 5.8 で非推奨となりました。
+    Laravel 5.9 では削除される予定なので、 Arr , Str を使いましょう。
+
+    - https://readouble.com/laravel/5.8/ja/upgrade.html

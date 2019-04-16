@@ -1,97 +1,34 @@
 rules:
-  - id: com.example.php.core.define.reserved
+  - id: review.sider.php.54.array
     pattern:
-      regexp: define\((['"])__\S+__\1
+      token: "array("
+      case_sensitive: false
     message: |
-      __ から始まる定数は、推奨されていません。
-      将来PHPに定数の予約語が追加された場合に動作しなくなる可能性があります。
-      https://www.php.net/manual/ja/language.constants.php
+      配列定義は可読性の高い [] で定義しましょう
+
+      PHP 5.4 以降、 array() の代わりに [] を利用できます。
+      特別な理由がない限り、 [] を利用しましょう。
+
+      - https://www.php.net/manual/ja/language.types.array.php
     fail:
-      - define('__VARIABLE__', 'foo')
+      - array(1,2,3)
     pass:
-      - define('VARIABLE', 'foo')
+      - "[1,2,3]"
     glob:
       - "*.php"
       - "**/*.php"
-  - id: com.example.php.core.hash
-    pattern:
-      regexp: (?:md5|sha1)\(\S+\)
-    message: |
-      この関数は、セキュリティの観点から推奨されていません。
-      https://www.php.net/manual/ja/function.md5.php
-      より強力なハッシュアルゴリズムを利用しましょう。
-      https://www.php.net/manual/ja/function.password-hash.php
-    fail:
-      - md5('HASH_STRING')
-      - sha1('HASH_STRING')
-    pass:
-      - password_hash('HASH_STRING', PASSWORD_DEFAULT)
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.core.class.upper_camelcase
-    pattern:
-      regexp: class (?:[a-z]\S+|\S+_\S+)
-    message: |
-      PSR-1コーディング規約では、クラス名は アッパーキャメルケース（大文字で始めるキャメルケース） が推奨されています。
-      https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md
-    fail:
-      - class upperCase
-      - class Upper_case
-    pass:
-      - class UpperCase
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.core.function.camelcase
-    pattern:
-      regexp: function (?:[A-Z]\S+|\S+_\S+)
-    message: |
-      PSR-1コーディング規約では、関数名は キャメルケース が推奨されています。
-      https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md
-      プロジェクト内の規約で許可されている場合、この警告は無視してください。
-    fail:
-      - function PrintEmail($email)
-      - function print_email($email)
-    pass:
-      - function printEmail($email)
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.ver54.array
-    pattern: "array("
-    message: |
-      PHP 5.4 以降、 配列は [] で定義できます。 
-      可読性を上げるため、活用しましょう。
-      https://www.php.net/manual/ja/language.types.array.php
-    fail:
-      - array('foo')
-    pass:
-      - "['foo']"
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.ver72.create_function
-    pattern: create_function(
-    message: |
-      この関数は、PHP 7.2 で非推奨になりました。
-      https://www.php.net/manual/ja/function.create-function.php
-      無名関数を利用することをお勧めします。
-      https://www.php.net/manual/ja/functions.anonymous.php
-    fail:
-      - create_function('$var', 'return "Hello,{$var}";');
-    pass:
-      - function ($var) { return "Hello,{$var}"; }
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.ver70.elvis_operator
+    justification:
+      - 実行環境が PHP 5.4 未満
+  - id: review.sider.php.70.elvis_operator
     pattern:
         regexp: 'isset\((\S+)\) *\? *\1 * : *(["''])\S+\2'
     message: |
-      PHP 7.0 以降、 エルビス演算子 の代わりに null合体演算子 を利用できます。 
-      可読性を上げるため、活用しましょう。
-      https://ja.wikipedia.org/wiki/Null%E5%90%88%E4%BD%93%E6%BC%94%E7%AE%97%E5%AD%90#PHP
+      null合体演算子 を利用することで、よりシンプルなコードにできます
+
+      PHP 7.0 以降、 エルビス演算子 の代わりに null合体演算子 を利用できます。
+      可読性を上げるため活用しましょう。
+
+      - https://ja.wikipedia.org/wiki/Null%E5%90%88%E4%BD%93%E6%BC%94%E7%AE%97%E5%AD%90#PHP
     fail:
       - "isset($var) ? $var : 'var'"
     pass:
@@ -99,40 +36,7 @@ rules:
     glob:
       - "*.php"
       - "**/*.php"
-  - id: com.example.php.ver73.image2wbmp
-    pattern: image2wbmp
-    message: |
-      この関数は、 PHP 7.3 で非推奨となりました。
-      同等の機能を持つ imagewbmp を使用しましょう。
-      https://wiki.php.net/rfc/image2wbmp
-    fail:
-      - define('__FOO__', 'foo')
-    pass:
-      - define('FOO', 'foo')
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.ver73.fgetss
-    pattern: fgetss(
-    message: |
-      この関数は、PHP 7.3 で非推奨となりました。
-      fgets 関数を利用してください。
-      https://www.php.net/manual/ja/function.fgetss.php
-    fail:
-      - fgetss($handle, 4096)
-    pass:
-      - fgets($handle, 4096)
-    glob:
-      - "*.php"
-      - "**/*.php"
-  - id: com.example.php.core.end_tag
-    pattern: "?>"
-    message: |
-      PHPのみのファイルでは、終了タグ（?>）を省略しなければなりません。
-      終了タグの後に空白や改行があると、それがブラウザに出力されてしまい、表示崩れの原因となります。
-      https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
-    glob:
-      - "*.php"
-      - "**/*.php"
+    justification:
+      - 実行環境が PHP 7.0 未満
 exclude:
   - vendor
